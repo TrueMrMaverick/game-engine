@@ -11,7 +11,7 @@ import java.awt.*;
 public class Camera2D {
 
     protected JPanel jPanel;
-    protected Graphics g;
+    protected Graphics2D g;
     protected double L, R, B, T;
     protected int W, H;
     private double posX, posY;
@@ -117,12 +117,36 @@ public class Camera2D {
         jPanel.repaint();
     }
 
+
     public void axes() {
         // Отрисовка координатных осей
+        Color defaultColor = g.getColor();
+
+        g.setColor(Color.lightGray);
+
+        for (int i = (int) B - 1; i < (int) T + 1; i++) {
+            moveTo(L, i);
+            lineTo(R, i);
+        }
+
+
+        for (int i = (int) L - 1; i < (int) R + 1; i++) {
+            moveTo(i, B);
+            lineTo(i, T);
+        }
+
+        g.setColor(defaultColor);
+
+
+        Stroke defaultStroke = g.getStroke();
+        BasicStroke axesStroke = new BasicStroke(2f);
+        g.setStroke(axesStroke);
         moveTo(L, 0);
         lineTo(R, 0);
         moveTo(0, B);
         lineTo(0, T);
+        g.setStroke(defaultStroke);
+
     }
 
     public void startDragging(int X, int Y) {

@@ -16,7 +16,9 @@ import java.util.ArrayList;
 public class ModelPanel2D extends JPanel{
     private Scene2D scene2D = new Scene2D(this, -30, 30, -15, 30);
 
-    private boolean mousePressed = false;
+    protected boolean leftMouseButtonPressed = false;
+    protected boolean rightMouseButtonPressed = false;
+
 
     private boolean isLineDrawing = false;
 
@@ -24,25 +26,22 @@ public class ModelPanel2D extends JPanel{
     public ModelDrawer model2DFrame;
 
 
+    public ModelPanel2D(){
+    }
+
     public ModelPanel2D(ModelDrawer jFrame) {
         setLayout(new BorderLayout());
         model2DFrame = jFrame;
         ModelPanel2D self = this;
         setBorder(BorderFactory.createLineBorder(Color.black));
         self.setVisible(true);
+        scene2D.hasAxes(true);
         initMouseListeners();
         initKeyListeners();
     }
 
-    public ModelPanel2D(String model, ModelDrawer jFrame) {
-        setLayout(new BorderLayout());
-        setFocusable(true);
-        model2DFrame = jFrame;
-        ModelPanel2D self = this;
-        setBorder(BorderFactory.createLineBorder(Color.black));
-        self.setVisible(true);
-        initMouseListeners();
-        initKeyListeners();
+    public ModelPanel2D(ModelDrawer jFrame, String model) {
+        this(jFrame);
 
 
         String modelStoragePath = modelPath();
@@ -76,22 +75,29 @@ public class ModelPanel2D extends JPanel{
             @Override
             public void mousePressed(MouseEvent e){
                 requestFocusInWindow();
-                if(e.getButton() == 1){
-                    if (model2DFrame.mainMenu.isNewLineDrawing){
-                        if(isLineDrawing){
-                            scene2D.addPoint(e.getX(), e.getY());
+
+                switch (e.getButton()){
+                    case 1:
+                        leftMouseButtonPressed = true;
+                        if (model2DFrame.mainMenu.isNewLineDrawing){
+                            if(isLineDrawing){
+                                scene2D.addPoint(e.getX(), e.getY());
+                            } else {
+                                scene2D.newLine(e.getX(), e.getY());
+                                isLineDrawing = true;
+                            }
                         } else {
-                            scene2D.newLine(e.getX(), e.getY());
-                            isLineDrawing = true;
+                            scene2D.startDragging(e.getX(), e.getY());
                         }
-                    } else {
+                        break;
+                    case 3:
+                        rightMouseButtonPressed = true;
+                        if(isLineDrawing){
+                            isLineDrawing = false;
+                            scene2D.endLineDrawing();
+                        }
                         scene2D.startDragging(e.getX(), e.getY());
-                    }
-                } else {
-                    if(isLineDrawing){
-                        isLineDrawing = false;
-                        scene2D.endLineDrawing();
-                    }
+                        break;
                 }
 
                 repaint();
@@ -99,6 +105,14 @@ public class ModelPanel2D extends JPanel{
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                switch (e.getButton()){
+                    case 1:
+                        leftMouseButtonPressed = false;
+                        break;
+                    case 3:
+                        rightMouseButtonPressed = false;
+                        break;
+                }
                 scene2D.stopDragging();
             }
 
@@ -115,15 +129,22 @@ public class ModelPanel2D extends JPanel{
         addMouseMotionListener(new MouseAdapter(){
             @Override
             public void mouseDragged(MouseEvent e){
-                scene2D.drag(e.getX(),e.getY());
+                if (model2DFrame.mainMenu.isNewLineDrawing) {
+                    if(rightMouseButtonPressed){
+                        scene2D.drag(e.getX(),e.getY());
+                    }
+                } else {
+                    scene2D.drag(e.getX(),e.getY());
+                }
+
             }
 
             @Override
             public void mouseMoved(MouseEvent e){
                 String x = String.format("%.2f", scene2D.screenToWorldX(e.getX()));
                 String y = String.format("%.2f", scene2D.screenToWorldY(e.getY()));
-                if (model2DFrame.mainMenu.toolsMenu.drawToolFrame != null){
-                    model2DFrame.mainMenu.toolsMenu.drawToolFrame.coordinatesLable.setText("X: " + x + "; Y: " + y + " ;");
+                if (model2DFrame.mainMenu.drawingDrawingToolsMenu.drawToolFrame != null){
+                    model2DFrame.mainMenu.drawingDrawingToolsMenu.drawToolFrame.coordinatesLabel.setText("X: " + x + "; Y: " + y + " ;");
                 }
                 if(isLineDrawing){
                     scene2D.dynamicLine(e.getX(), e.getY());
@@ -160,7 +181,7 @@ public class ModelPanel2D extends JPanel{
     }
 
 
-    public static String modelPath(){
+    protected static String modelPath(){
         String path = ModelPanel2D.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         path = path.split("out")[0];
         path += "\\src\\com\\company\\Resources\\Models\\";
@@ -168,15 +189,13 @@ public class ModelPanel2D extends JPanel{
     }
 
 
-    private void switchMousePressed(){
-        if(mousePressed){
-            mousePressed = false;
-        } else {
-            mousePressed = true;
-        }
+    public ArrayList<Model2D> getModel(){
+        return scene2D.getModelList();
     }
 
-
+    public void setLineDrawing(boolean lineDrawing) {
+        isLineDrawing = lineDrawing;
+    }
 
     public Dimension getPreferredSize() {
         return new Dimension(250,200);
@@ -188,6 +207,6 @@ public class ModelPanel2D extends JPanel{
 //        g.fillRect(0, 0, getWidth(), getHeight() );
 //        g.setColor( Color.BLACK );
         scene2D.setResolution(this);
-        scene2D.render(g);
+        scene2D.render((Graphics2D) g);
     }
 }

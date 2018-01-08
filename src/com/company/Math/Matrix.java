@@ -255,6 +255,30 @@ public class Matrix {
         return vector;
     }
 
+
+    public String toString(){
+        StringBuilder matrixString = new StringBuilder();
+
+        for (int i = 0; i < colSize; i++) {
+            for (int j = 0; j < rowSize; j++) {
+                matrixString.append(this.getElement(i, j));
+                if (j < rowSize - 1){
+                    matrixString.append(" ");
+                }
+            }
+            matrixString.append("\n");
+        }
+
+        return matrixString.toString();
+    }
+
+    public String toFileWrite(){
+        StringBuilder matrixString = new StringBuilder();
+        matrixString.append(rowSize + " " + colSize + "\n");
+        matrixString.append(this.toString());
+        return matrixString.toString();
+    }
+
     public  Vector getLastRow(){
         return cells.get(colSize - 1);
     }

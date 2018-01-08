@@ -4,6 +4,7 @@ import com.company.Cameras.Camera2D;
 import com.company.Math.Matrix;
 import com.company.Math.Vector;
 import com.company.Models.Model2D;
+import com.company.Panels.ModelPanel2D;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,23 +15,28 @@ import java.util.ArrayList;
  */
 public class Scene2D extends Camera2D {
 
+    private boolean isAxes = false;
+
     public String functionType;
 
-    private ArrayList<Model2D> model2DList = new ArrayList<>();
+    protected ArrayList<Model2D> model2DList = new ArrayList<>();
 
 
 
 
-    public Scene2D(JPanel jPanel) {
+    public Scene2D() {
+    }
+
+    public Scene2D(ModelPanel2D jPanel) {
         super(jPanel);
     }
 
-    public Scene2D(JPanel jPanel, double l, double r, double b, double t) {
+    public Scene2D(ModelPanel2D jPanel, double l, double r, double b, double t) {
         super(jPanel, l, r, b, t);
     }
 
 
-    public void plot(Graphics g, boolean isAxes){
+    public void plot(Graphics2D g, boolean isAxes){
         this.g = g;
 
         if(isAxes) {
@@ -46,7 +52,7 @@ public class Scene2D extends Camera2D {
         }
     }
 
-    public void twoCenterBipolarPlot(Graphics g, double tMin, double tMax, double c, double a, boolean isAxes){
+    public void twoCenterBipolarPlot(Graphics2D g, double tMin, double tMax, double c, double a, boolean isAxes){
 
         this.g = g;
 
@@ -94,9 +100,16 @@ public class Scene2D extends Camera2D {
         return (Math.sqrt(16 * c*c*r1*r1 - (r1*r1 - r2*r2 + 4 * c*c) * (r1*r1 - r2*r2 + 4 * c*c))) / (4 * c);
     }
 
-    public void render(Graphics g){
+    public void render(Graphics2D g){
         this.g = g;
-        axes();
+        render();
+    }
+
+    public void render(){
+        if(isAxes) {
+            axes();
+        }
+
         for (int index = 0; index < model2DList.size(); index++) {
 
             Matrix vertices = new Matrix(model2DList.get(index).vertices);
@@ -140,12 +153,12 @@ public class Scene2D extends Camera2D {
         return 0;
     }
 
-    private double getX(int index, int type,  Matrix vertices, Matrix edges){
+    protected double getX(int index, int type,  Matrix vertices, Matrix edges){
         double pointNumber = edges.getElement(index, type);
         return vertices.getElement(0, (int) pointNumber - 1);
     }
 
-    private double getY(int index, int type, Matrix vertices, Matrix edges){
+    protected double getY(int index, int type, Matrix vertices, Matrix edges){
         double pointNumber = edges.getElement(index, type);
         return vertices.getElement(1, (int) pointNumber - 1);
     }
@@ -160,6 +173,10 @@ public class Scene2D extends Camera2D {
 
     public void setFunctionType(String functionType) {
         this.functionType = functionType;
+    }
+
+    public ArrayList<Model2D> getModelList(){
+        return model2DList;
     }
 
     public void newLine(int x, int y) {
@@ -202,5 +219,9 @@ public class Scene2D extends Camera2D {
         Matrix edges = model2D.edges;
         vertices.removeCol(vertices.getRowSize() - 1);
         edges.removeRow(edges.getColSize() - 1);
+    }
+
+    public void hasAxes(boolean hasAxes){
+        isAxes = hasAxes;
     }
 }

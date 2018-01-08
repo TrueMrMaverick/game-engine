@@ -10,19 +10,18 @@ import java.awt.event.ActionListener;
  */
 public class DrawingToolsFrame extends JFrame {
 
-    public JLabel coordinatesLable;
+    public JLabel coordinatesLabel;
     public JButton lineButton;
 
     public DrawingToolsFrame(ModelDrawer jFrame) {
         super("Drawing Tools");
-        this.setBounds(100, 100, 100, 300);
 
         JPanel toolsPanel = initToolsPanel(jFrame);
         this.add(toolsPanel);
 
-        coordinatesLable = new JLabel();
-        coordinatesLable.setText("Coordinates");
-        toolsPanel.add(coordinatesLable);
+        coordinatesLabel = new JLabel();
+        coordinatesLabel.setText("Coordinates");
+        toolsPanel.add(coordinatesLabel);
 
         lineButton = new JButton("New Line");
         lineButton.addActionListener(new ActionListener() {
@@ -32,21 +31,13 @@ public class DrawingToolsFrame extends JFrame {
             }
         });
         toolsPanel.add(lineButton);
-
-        JButton button = new JButton("Shit");
-        toolsPanel.add(button);
-
-        JButton button1 = new JButton("Shit");
-        toolsPanel.add(button1);
-
-
+        this.pack();
         this.setVisible(true);
     }
 
     private JPanel initToolsPanel(JFrame jFrame) {
         JPanel jPanel = new JPanel();
         jPanel.setVisible(true);
-        jPanel.setSize(50, 150);
         jPanel.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
         jPanel.setLayout(new GridLayout(3, 2));
         return jPanel;

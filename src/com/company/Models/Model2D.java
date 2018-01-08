@@ -1,6 +1,7 @@
 package com.company.Models;
 
 import com.company.DTO.AnimationDTO;
+import com.company.Frames.ModelPropertiesFrame;
 import com.company.Math.Matrix;
 import com.company.Services.AnimationService;
 import com.company.Services.ModelService;
@@ -22,6 +23,7 @@ public class Model2D {
     private String path;
     private boolean isAnimated;
 
+
     private AnimationService animationService = new AnimationService();
     private ModelService modelService = new ModelService();
 
@@ -38,12 +40,11 @@ public class Model2D {
     public Model2D(String path, String modelName, File[] modelProperties){
         this.path = path;
         this.modelName = modelName;
-        vertices = new Matrix(modelService.fileMatrixInit(path + "Vertices.txt"));
-        edges = new Matrix(modelService.fileMatrixInit(path + "Edges.txt"));
+        vertices = new Matrix(modelService.modelLoader(path + "Vertices.txt"));
+        edges = new Matrix(modelService.modelLoader(path + "Edges.txt"));
 
         for (File file:
              modelProperties) {
-            String fileName = file.getName();
             if(file.getName().equals("Animation.txt")){
                 isAnimated = true;
                 animation(file);
@@ -93,4 +94,5 @@ public class Model2D {
         });
         timer.start();
     }
+
 }
