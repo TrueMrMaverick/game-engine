@@ -21,6 +21,8 @@ public class ModelPanel2D extends JPanel{
 
 
     private boolean isLineDrawing = false;
+    private boolean isRunning= false;
+
 
 
     public ModelDrawer model2DFrame;
@@ -35,7 +37,7 @@ public class ModelPanel2D extends JPanel{
         ModelPanel2D self = this;
         setBorder(BorderFactory.createLineBorder(Color.black));
         self.setVisible(true);
-        scene2D.hasAxes(true);
+        //scene2D.hasAxes(true);
         initMouseListeners();
         initKeyListeners();
     }
@@ -43,29 +45,8 @@ public class ModelPanel2D extends JPanel{
     public ModelPanel2D(ModelDrawer jFrame, String model) {
         this(jFrame);
 
-
-        String modelStoragePath = modelPath();
-        File modelStorage = new File(modelStoragePath);
-
-        File windMillModelsStorage = new File(modelStoragePath + model);
-
-        File[] listFiles = windMillModelsStorage.listFiles();
-
-        ArrayList<Model2D> modelList = new ArrayList<>();
-
-        for (int i = 0; i < listFiles.length; i++){
-            String modelName = listFiles[i].getName();
-            File[] modelProperties = new File(listFiles[i].getAbsolutePath()).listFiles();
-            Model2D model2D = new Model2D(listFiles[i].getAbsolutePath() + "\\", modelName, modelProperties);
-            modelList.add(model2D);
-        }
-
-        for (Model2D model2D:
-             modelList) {
-            scene2D.addModel(model2D);
-        }
-       
-
+        scene2D.addModel(model);
+        scene2D.startAnimation("Person","BasePose");
 
         repaint();
     }
@@ -143,7 +124,7 @@ public class ModelPanel2D extends JPanel{
             public void mouseMoved(MouseEvent e){
                 String x = String.format("%.2f", scene2D.screenToWorldX(e.getX()));
                 String y = String.format("%.2f", scene2D.screenToWorldY(e.getY()));
-                if (model2DFrame.mainMenu.drawingDrawingToolsMenu.drawToolFrame != null){
+                if (model2DFrame.mainMenu.drawingDrawingToolsMenu != null && model2DFrame.mainMenu.drawingDrawingToolsMenu.drawToolFrame != null){
                     model2DFrame.mainMenu.drawingDrawingToolsMenu.drawToolFrame.coordinatesLabel.setText("X: " + x + "; Y: " + y + " ;");
                 }
                 if(isLineDrawing){
@@ -155,6 +136,7 @@ public class ModelPanel2D extends JPanel{
     }
 
     private void initKeyListeners(){
+
         addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -171,26 +153,54 @@ public class ModelPanel2D extends JPanel{
                             scene2D.endLineDrawing();
                         }
                         break;
+
+                    case KeyEvent.VK_D:
+                        if(!isRunning){
+                            scene2D.toBasePosition("Person");
+                            scene2D.startAnimation("Person","StartRun");
+                            setIsRunning();
+                        } else {
+                            scene2D.startAnimation("Person","RunAnimation");
+
+                        }
+                        break;
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
+                switch (e.getKeyCode()){
+                    case KeyEvent.VK_D:
+                        scene2D.endAnimation("Person");
+                        setIsRunning();
+                        break;
+                }
             }
         });
     }
 
+    private void setIsRunning(){
+        if(isRunning){
+            isRunning = false;
+        } else {
+            isRunning = true;
+        }
+    }
 
-    protected static String modelPath(){
+    public static String modelPath(){
         String path = ModelPanel2D.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         path = path.split("out")[0];
         path += "\\src\\com\\company\\Resources\\Models\\";
         return path;
     }
 
+    public void refresh(){
+        scene2D.refreshModels();
+    }
+
 
     public ArrayList<Model2D> getModel(){
-        return scene2D.getModelList();
+        return scene2D.getModelList().get(0).getModelList();
     }
 
     public void setLineDrawing(boolean lineDrawing) {

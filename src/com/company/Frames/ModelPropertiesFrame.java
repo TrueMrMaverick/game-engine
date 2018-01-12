@@ -3,7 +3,6 @@ package com.company.Frames;
 import com.company.Math.Matrix;
 import com.company.Math.Vector;
 import com.company.Models.Model2D;
-import com.company.Panels.AnimationCreatorPanel;
 import com.company.Scenes.AnimationCreatorScene;
 
 import javax.swing.*;
@@ -18,14 +17,14 @@ import java.util.ArrayList;
 public class ModelPropertiesFrame extends JFrame {
 
     private AnimationCreatorScene animationCreatorScene;
-    public JPanel mainPanel;
+    private JPanel mainPanel;
     public ArrayList<JLabel> coordinatesLabelsList;
     private ArrayList<Model2D> model2DList;
 
     public ModelPropertiesFrame(AnimationCreatorScene animationCreatorScene){
         super("Model Properties");
         this.animationCreatorScene = animationCreatorScene;
-        this.model2DList = animationCreatorScene.getModelList();
+        this.model2DList = animationCreatorScene.getModelList().get(0).getModelList();
         coordinatesLabelsList = new ArrayList<>();
 
         mainPanel = initMainPanel();

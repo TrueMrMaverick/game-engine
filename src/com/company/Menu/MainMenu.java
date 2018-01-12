@@ -69,7 +69,7 @@ public class MainMenu extends JMenuBar {
         if(prevDirInFileChooser != null){
             fileChooser.setCurrentDirectory(prevDirInFileChooser);
         } else {
-            fileChooser.setCurrentDirectory(new File("D:\\Programs\\Java\\UNIVERAS_LABAS\\game-engine\\src\\com\\company\\Resources\\Models"));
+            fileChooser.setCurrentDirectory(new File(new ModelPanel2D().modelPath()));
         }
         fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -98,6 +98,9 @@ public class MainMenu extends JMenuBar {
                     AnimationCreatorPanel animationCreatorPanel = new AnimationCreatorPanel(parentFrame, fileName);
                     animationToolsMenu = new AnimationToolsMenu(parentFrame, animationCreatorPanel);
                     self.add(animationToolsMenu);
+
+
+
                     animationCreatorPanelsStack.add(animationCreatorPanel);
                     parentFrame.add(animationCreatorPanel);
                     currPanel = animationCreatorPanel;
@@ -119,7 +122,7 @@ public class MainMenu extends JMenuBar {
         if(prevDirInFileChooser != null){
             fileChooser.setCurrentDirectory(prevDirInFileChooser);
         } else {
-            fileChooser.setCurrentDirectory(new File("D:\\Programs\\Java\\UNIVERAS_LABAS\\game-engine\\src\\com\\company\\Resources\\Models"));
+            fileChooser.setCurrentDirectory(new File(new ModelPanel2D().modelPath()));
         }
         fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -135,6 +138,15 @@ public class MainMenu extends JMenuBar {
                     modelPanels2DStack.add(modelPanel2D);
                     parentFrame.add(modelPanel2D);
                     currPanel = modelPanel2D;
+//
+//                    JMenuItem refresh = new JMenuItem("Refresh model");
+//                    refresh.addActionListener(new ActionListener() {
+//                        @Override
+//                        public void actionPerformed(ActionEvent e) {
+//                            currPanel.refresh();
+//                        }
+//                    });
+                    //self.add(refresh);
                     modelPanel2D.setVisible(true);
                     parentFrame.revalidate();
                 }
@@ -152,7 +164,7 @@ public class MainMenu extends JMenuBar {
         if(prevDirInFileChooser != null){
             fileChooser.setCurrentDirectory(prevDirInFileChooser);
         } else {
-            fileChooser.setCurrentDirectory(new File("D:\\Programs\\Java\\UNIVERAS_LABAS\\game-engine\\src\\com\\company\\Resources\\Models"));
+            fileChooser.setCurrentDirectory(new File(new ModelPanel2D().modelPath()));
         }
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setDialogTitle("Save Model");

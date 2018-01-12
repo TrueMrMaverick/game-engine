@@ -1,120 +1,85 @@
 package com.company.Services;
 
-import com.company.DTO.AnimationDTO;
-import com.company.Math.AffineTransform2D;
+import com.company.AnimationParsers.*;
+import com.company.Animations.Animation;
+import com.company.Enums.AnimationType;
 import com.company.Math.Matrix;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import static java.lang.StrictMath.PI;
-import static java.lang.StrictMath.cos;
-import static java.lang.StrictMath.sin;
+import java.util.ArrayList;
+
 
 /**
  * Created by Nikita on 26.12.2017.
  */
-public class AnimationService {
+public class AnimationService extends BaseService{
 
-    private AffineTransform2D affineTransform2D = new AffineTransform2D();
-
+    private ArrayList<AnimationParser> animationParsers = new ArrayList<>();
 
     public AnimationService(){}
 
-    public ArrayList<AnimationDTO> getModelAnimations(File file){
+    public Matrix animationLoader(File file) {
+       return matrixFromFileLoader(file);
+    }
 
-        ArrayList<String> stringList = new ArrayList<>();
-        try {
-            FileReader fileReader = new FileReader(file);
-            BufferedReader out = new BufferedReader(fileReader);
 
-            try {
-                String stringBuffer;
-                while ((stringBuffer = out.readLine()) != null){
-                    stringList.add(stringBuffer);
-                }
-            } finally {
-                out.close();
-            }
+    public ArrayList<Animation> modelAnimationsLoader(File animationDir) {
+        ArrayList<Animation> animations = new ArrayList<>();
 
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-        ArrayList<AnimationDTO> animationList = new ArrayList<>();
-        List<String> temp = new ArrayList<>();
-        String buffer = "";
-        for (int i = 0; i < stringList.size(); i++) {
-            String subString = stringList.get(i);
-            for(int j = 0; j < subString.length(); j++){
-                if(subString.charAt(j) != ' '){
-                    buffer += subString.charAt(j);
-                } else {
-                    temp.add(buffer);
-                    buffer = "";
-                }
-            }
-
-            temp.add(buffer);
-
-            AnimationDTO animationDTO = new AnimationDTO();
-            for (int j = 0; j < temp.size(); j++){
-                if(j == 0){
-                    animationDTO.setType(temp.get(j));
-                } else {
-                    animationDTO.getParams().add(temp.get(j));
-                }
-            }
-
-            animationList.add(animationDTO);
-            temp.clear();
+        for (File file:
+                animationDir.listFiles()) {
+            animations.add(new Animation(file));
         }
 
-        return animationList;
+        return animations;
     }
 
-    public Matrix move(Matrix matrix, double x, double y){
-        return affineTransform2D.translation(x, y).mult(matrix);
+    public void setAnimationParsers(Animation animation) {
+        animationParsers.clear();
+        Matrix matrix = animation.getMatrix();
+
+        for (int i = 0; i < matrix.getColSize(); i++) {
+            AnimationType animationType = AnimationType.intToAnimationType((int) matrix.getElement(i, 0));
+            double param1 = matrix.getElement(i, 1);
+            double param2 = matrix.getElement(i, 2);
+            double time = (int) matrix.getElement(i, 3);
+
+            switch (animationType){
+                case MOVE:
+                    animationParsers.add(new AnimationMove(param1, param2, time));
+                    break;
+                case SCALE:
+                    animationParsers.add(new AnimationScale(param1, param2, time));
+                    break;
+                case FIXED_TURN:
+                    animationParsers.add(new AnimationFixedTurn(param1, param2, time));
+                    break;
+                case FORWARD_TURN:
+                    animationParsers.add(new AnimationForwardTurn(param1, param2, time));
+                    break;
+            }
+        }
     }
 
-    public Matrix turn(Matrix matrix, double t, int point){
-        double pointX = matrix.getElement(0, point - 1);
-        double pointY = matrix.getElement(1, point - 1);
-        Matrix result = matrix.clone();
-        result = move(result, -pointX, -pointY);
-        //result.print("До поворота: ");
-        result = affineTransform2D.rotation(t).mult(result);
-        //result.print("После поворота: ");
-        result = move(result, pointX, pointY);
-        return result;
-    }
-    public Matrix turn(Matrix matrix, double cos, double sin, int point){
-        double pointX = matrix.getElement(0, point - 1);
-        double pointY = matrix.getElement(1, point - 1);
-        Matrix result = matrix.clone();
-        result = move(result, -pointX, -pointY);
-        //result.print("До поворота: ");
-        result = affineTransform2D.rotation(cos, sin).mult(result);
-        //result.print("После поворота: ");
-        result = move(result, pointX, pointY);
-        return result;
+    public boolean runAnimation(Matrix vertices){
+        for (AnimationParser animationParser:
+             animationParsers) {
+            if (!animationParser.run(vertices)){
+                return false;
+            }
+        }
+        return true;
     }
 
-    public Matrix scale(Matrix matrix, double kx, double ky){
-        return affineTransform2D.scaling(kx,ky).mult(matrix);
-    }
-
-    public Matrix reflect(Matrix matrix){
-        double pointX = matrix.getElement(0, 0);
-        double pointY = matrix.getElement(1, 0);
-        Matrix result = matrix.clone();
-        result = move(result, -pointX, -pointY);
-        result = affineTransform2D.rotation(cos(PI), sin(PI)).mult(result);
-        result = move(result, -pointX, -pointY);
-        return result;
+    public boolean reverseAnimation(Matrix vertices) {
+        for (AnimationParser animationParser:
+                animationParsers) {
+            if (!animationParser.reverse(vertices)){
+                return false;
+            }
+        }
+        return true;
     }
 }
 

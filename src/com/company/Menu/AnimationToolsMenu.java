@@ -1,6 +1,5 @@
 package com.company.Menu;
 
-import com.company.Animation;
 import com.company.Frames.AnimationToolsFrame;
 import com.company.Frames.ModelDrawer;
 import com.company.Frames.ModelPropertiesFrame;

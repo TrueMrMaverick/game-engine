@@ -11,64 +11,14 @@ import java.util.List;
 /**
  * Created by Nikita on 26.12.2017.
  */
-public class ModelService {
+public class ModelService extends BaseService{
     public ModelService() {
     }
 
     public Matrix modelLoader(String filePath){
         File file = new File(filePath);
-        ArrayList<String> stringList = new ArrayList<>();
-        try {
-            FileReader fileReader = new FileReader(file);
-            BufferedReader out = new BufferedReader(fileReader);
 
-            try {
-                String stringBuffer;
-                while ((stringBuffer = out.readLine()) != null){
-                    stringList.add(stringBuffer);
-                }
-            } finally {
-                out.close();
-            }
-
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        ArrayList<Double> intBuffer = new ArrayList<>();
-        Matrix matrix = new Matrix();
-        for (int i = 0; i < stringList.size(); i++){
-            String subString = stringList.get(i);
-            String temp = new String();
-            for(int j = 0; j < subString.length(); j++){
-                if(subString.charAt(j) != ' '){
-                    temp += subString.charAt(j);
-                } else {
-                    intBuffer.add(Double.parseDouble(temp));
-                    temp = "";
-                }
-            }
-            if(temp != ""){
-                intBuffer.add(Double.parseDouble(temp));
-            }
-
-            if (i == 0){
-                int row = (int) Math.round(intBuffer.get(0));
-                int col = (int) Math.round(intBuffer.get(1));
-
-                matrix = new Matrix(row, col);
-            } else {
-                List<Double> doubleBuffer = new ArrayList<>();
-                for (int idx = 0; idx < intBuffer.size(); idx++){
-                    doubleBuffer.add((double) intBuffer.get(idx));
-                }
-                Vector line = new Vector(doubleBuffer);
-                matrix.setRow(i - 1, line);
-            }
-            intBuffer.clear();
-        }
-
-        return matrix;
+        return matrixFromFileLoader(file);
     }
 
     public void modelSaver(File file, ArrayList<Model2D> model2DArrayList){
@@ -120,5 +70,15 @@ public class ModelService {
             e.printStackTrace();
         }
 
+    }
+
+    public double getX(int index, int type,  Matrix vertices, Matrix edges){
+        double pointNumber = edges.getElement(index, type);
+        return vertices.getElement(0, (int) pointNumber - 1);
+    }
+
+    public double getY(int index, int type, Matrix vertices, Matrix edges){
+        double pointNumber = edges.getElement(index, type);
+        return vertices.getElement(1, (int) pointNumber - 1);
     }
 }

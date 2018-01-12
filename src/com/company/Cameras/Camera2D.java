@@ -14,7 +14,7 @@ public class Camera2D {
     protected Graphics2D g;
     protected double L, R, B, T;
     protected int W, H;
-    private double posX, posY;
+    protected double posX, posY;
     private int prevScreenX, prevScreenY;
     private boolean isDragging;
     private int prevDragScreenX, prevDragScreenY;
@@ -57,6 +57,17 @@ public class Camera2D {
         R = r;
         B = b;
         T = t;
+    }
+
+    public Camera2D(Camera2D camera2D){
+        jPanel = camera2D.jPanel;
+        L = camera2D.L;
+        R = camera2D.R;
+        B = camera2D.B;
+        T = camera2D.T;
+        g = camera2D.g;
+        W = camera2D.W;
+        H = camera2D.H;
     }
 
     public void clear(){
@@ -106,7 +117,7 @@ public class Camera2D {
         int screenY = worldToScreenY(Y);
 
         prevScreenX = worldToScreenX(posX);
-        prevScreenY= worldToScreenY(posY);
+        prevScreenY = worldToScreenY(posY);
 
         //moveTo(prevScreenX, prevScreenY);
 
@@ -149,22 +160,25 @@ public class Camera2D {
 
     }
 
-    public void startDragging(int X, int Y) {
+    public boolean startDragging(int X, int Y) {
         isDragging = true;
         prevDragScreenX = X;
         prevDragScreenY = Y;
+        return true;
     }
 
     public void drag(int X, int Y){
-        double newL = L - ((R - L) * (X - prevDragScreenX)) / W;
-        double newR = R - ((R - L) * (X - prevDragScreenX)) / W;
-        L = newL;
-        R = newR;
-        double newB = B + ((T - B) * (Y - prevDragScreenY)) / H;
-        double newT = T + ((T - B) * (Y - prevDragScreenY)) / H;
-        B = newB;
-        T = newT;
-        startDragging(X, Y);
+        if(isDragging){
+            double newL = L - ((R - L) * (X - prevDragScreenX)) / W;
+            double newR = R - ((R - L) * (X - prevDragScreenX)) / W;
+            L = newL;
+            R = newR;
+            double newB = B + ((T - B) * (Y - prevDragScreenY)) / H;
+            double newT = T + ((T - B) * (Y - prevDragScreenY)) / H;
+            B = newB;
+            T = newT;
+            startDragging(X, Y);
+        }
     }
 
     public void stopDragging() {
@@ -202,6 +216,16 @@ public class Camera2D {
         }
 
 
+    }
+
+    public  Camera2D clone(){
+        Camera2D camera2D = new Camera2D();
+
+
+
+
+
+        return camera2D;
     }
 
     public double getL() {
@@ -290,5 +314,37 @@ public class Camera2D {
 
     public void setDragging(boolean dragging) {
         isDragging = dragging;
+    }
+
+    public int getPrevDragScreenX() {
+        return prevDragScreenX;
+    }
+
+    public void setPrevDragScreenX(int prevDragScreenX) {
+        this.prevDragScreenX = prevDragScreenX;
+    }
+
+    public int getPrevDragScreenY() {
+        return prevDragScreenY;
+    }
+
+    public void setPrevDragScreenY(int prevDragScreenY) {
+        this.prevDragScreenY = prevDragScreenY;
+    }
+
+    public JPanel getjPanel() {
+        return jPanel;
+    }
+
+    public void setjPanel(JPanel jPanel) {
+        this.jPanel = jPanel;
+    }
+
+    public Graphics2D getG() {
+        return g;
+    }
+
+    public void setG(Graphics2D g) {
+        this.g = g;
     }
 }

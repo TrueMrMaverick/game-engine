@@ -1,5 +1,6 @@
 package com.company.Panels;
 
+import com.company.Figures.Square;
 import com.company.Frames.ModelDrawer;
 import com.company.Frames.ModelPropertiesFrame;
 import com.company.Models.Model2D;
@@ -38,39 +39,43 @@ public class AnimationCreatorPanel extends ModelPanel2D {
     public AnimationCreatorPanel(ModelDrawer jFrame, String model){
         this(jFrame);
 
-        String modelStoragePath = modelPath();
+        animationCreatorScene.addModel(model);
 
-        File modelsStorage = new File(modelStoragePath + model);
-
-        File[] listFiles = modelsStorage.listFiles();
-
-        ArrayList<Model2D> modelList = new ArrayList<>();
-
-        for (int i = 0; i < listFiles.length; i++){
-            String modelName = listFiles[i].getName();
-            File[] modelProperties = new File(listFiles[i].getAbsolutePath()).listFiles();
-            Model2D model2D = new Model2D(listFiles[i].getAbsolutePath() + "\\", modelName, modelProperties);
-            modelList.add(model2D);
-        }
-
-        for (Model2D model2D:
-                modelList) {
-            animationCreatorScene.addModel(model2D);
-        }
-
-
+        repaint();
     }
 
     private void initMouseListeners(){
         addMouseListener(new MouseAdapter(){
             @Override
             public void mousePressed(MouseEvent e){
-                animationCreatorScene.startDragging(e.getX(), e.getY());
+                boolean isSquareDragging = false;
+
+                for (Model2D model2D:
+                        animationCreatorScene.getModelList().get(0).getModelList()) {
+                    for (Square square:
+                            model2D.squares) {
+                        if(square.startDragging(e.getX(), e.getY())){
+                            isSquareDragging = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!isSquareDragging){
+                    animationCreatorScene.startDragging(e.getX(), e.getY());
+                }
                 repaint();
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                for (Model2D model2D:
+                        animationCreatorScene.getModelList().get(0).getModelList()) {
+                    for (Square square:
+                            model2D.squares) {
+                        square.stopDragging();
+                    }
+                }
                 animationCreatorScene.stopDragging();
             }
         });
@@ -86,6 +91,13 @@ public class AnimationCreatorPanel extends ModelPanel2D {
         addMouseMotionListener(new MouseAdapter(){
             @Override
             public void mouseDragged(MouseEvent e){
+                for (Model2D model2D:
+                        animationCreatorScene.getModelList().get(0).getModelList()) {
+                    for (Square square:
+                            model2D.squares) {
+                    square.dragFigure(e.getX(), e.getY());
+                    }
+                }
                 animationCreatorScene.drag(e.getX(),e.getY());
                 repaint();
             }
@@ -98,6 +110,8 @@ public class AnimationCreatorPanel extends ModelPanel2D {
         propertiesFrame = new ModelPropertiesFrame(animationCreatorScene);
         return propertiesFrame;
     }
+
+
 
     public Dimension getPreferredSize() {
         return new Dimension(250,200);

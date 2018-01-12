@@ -168,10 +168,12 @@ public class Matrix {
     }
 
     public Matrix clone(){
-        Matrix clone = new Matrix();
-        clone.rowSize = rowSize;
-        clone.colSize = colSize;
-        clone.cells = new ArrayList<>(cells);
+        Matrix clone = new Matrix(rowSize, colSize);
+        for (int i = 0; i < colSize; i++) {
+            for (int j = 0; j < rowSize; j++) {
+                clone.setElement(i, j, this.getElement(i,j));
+            }
+        }
         return clone;
     }
 

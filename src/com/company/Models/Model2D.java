@@ -1,7 +1,8 @@
 package com.company.Models;
 
-import com.company.DTO.AnimationDTO;
-import com.company.Frames.ModelPropertiesFrame;
+import com.company.Cameras.Camera2D;
+import com.company.Animations.Animation;
+import com.company.Figures.Square;
 import com.company.Math.Matrix;
 import com.company.Services.AnimationService;
 import com.company.Services.ModelService;
@@ -11,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Nikita on 24.12.2017.
@@ -19,9 +19,15 @@ import java.util.List;
 public class Model2D {
     public String modelName;
     public Matrix vertices;
+    public Matrix baseVertices;
     public Matrix edges;
     private String path;
     private boolean isAnimated;
+    private Timer timer;
+    public ArrayList<Square> squares = new ArrayList<>();
+    public ArrayList<Animation> modelAnimations = new ArrayList<>();
+    private boolean animationFlag = false;
+
 
 
     private AnimationService animationService = new AnimationService();
@@ -42,17 +48,13 @@ public class Model2D {
         this.modelName = modelName;
         vertices = new Matrix(modelService.modelLoader(path + "Vertices.txt"));
         edges = new Matrix(modelService.modelLoader(path + "Edges.txt"));
-
-        for (File file:
-             modelProperties) {
-            if(file.getName().equals("Animation.txt")){
-                isAnimated = true;
-                animation(file);
-            }
+        baseVertices = vertices.clone();
+        File animationDir = new File(path + "Animations");
+        if(animationDir.exists()){
+            modelAnimations = animationService.modelAnimationsLoader(animationDir);
         }
-
-
     }
+
 
 
     public void animation(ActionListener actionListener){
@@ -65,34 +67,64 @@ public class Model2D {
         timer.start();
     }
 
-    public void animation(File animationFile){
+    public void animation(String animationName){
+        int i = 0;
+        for (; i < modelAnimations.size(); i++) {
+            if(modelAnimations.get(i).getName().equals(animationName)){
+                break;
+            }
+        }
+        if (!animationFlag && i != modelAnimations.size()) {
+            Animation animation = modelAnimations.get(i);
+            animationService.setAnimationParsers(animation);
 
-        ArrayList<AnimationDTO> animationList = animationService.getModelAnimations(animationFile);
-
-        Timer timer = new Timer(0, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                for (AnimationDTO animation:
-                        animationList) {
-                    List<String> params = animation.getParams();
-                    if (animation.getType().equals("move")){
-                        vertices = animationService.move(vertices, Double.parseDouble(params.get(0)), Double.parseDouble(params.get(1)));
-                    } else if (animation.getType().equals("turn")){
-                        if(params.size() == 2){
-                            vertices = animationService.turn(vertices, Double.parseDouble(params.get(0)), Integer.parseInt(params.get(1)));
-                        } else {
-                            vertices = animationService.turn(vertices, Double.parseDouble(params.get(0)), Double.parseDouble(params.get(1)), Integer.parseInt(params.get(2)));
-                        }
-                    } else if (animation.getType().equals("scale")){
-                        vertices = animationService.scale(vertices, Double.parseDouble(params.get(0)), Double.parseDouble(params.get(1)));
-                    } if (animation.getType().equals("reflect")){
-                        vertices = animationService.reflect(vertices);
+            timer = new Timer(0, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(!animationService.runAnimation(vertices)){
+                        timer.stop();
+                        setAnimationFlag();
                     }
                 }
+            });
+            timer.start();
+            animationFlag = true;
+        }
+
+    }
+
+    private void setAnimationFlag() {
+        if(animationFlag){
+            animationFlag = false;
+        } else {
+            animationFlag = true;
+        }
+    }
+
+    public void refreshSquares(Camera2D camera2D) {
+        double squareWidth = 1;
+        if(squares.size() == 0){
+            for(int i = 0; i < vertices.getRowSize(); i++){
+                Square square = new Square(camera2D, vertices.getElement(0, i) - squareWidth/2 , vertices.getElement(1, i) - squareWidth/2, squareWidth);
+                squares.add(square);
             }
-        });
-        timer.start();
+        } else {
+            for(int i = 0; i < vertices.getRowSize(); i++){
+                squares.get(i).refresh(vertices.getElement(0, i) - squareWidth/2 , vertices.getElement(1, i) - squareWidth/2);
+            }
+        }
+
+    }
+
+    public void toBaseVertices(){
+        vertices = baseVertices.clone();
+        return;
+    }
+
+    public void stopTimer(){
+        if(timer != null){
+            timer.stop();
+        }
     }
 
 }
