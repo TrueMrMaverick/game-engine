@@ -1,12 +1,12 @@
 package com.company;
 
 
-import com.company.Frames.ModelDrawer;
+import com.company.app.MainFrame;
 
 public class Main {
 
     public static void main(String[] args) {
-	// write your code here
-        ModelDrawer modelDrawer = new ModelDrawer();
+        //ModelDrawer modelDrawer = new ModelDrawer();
+        MainFrame mainFrame = new MainFrame();
     }
 }
